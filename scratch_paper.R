@@ -5,6 +5,10 @@ library(lubridate)
 library(httr)
 library(jsonlite)
 
+source('../weather_api_key.R')
+
+team_res <- bref_team_results('Houston Astros', 2023)
+
 kelvin_to_f <- function(kelvin) {
   (kelvin - 273) * 9/5 + 32
 }
@@ -54,7 +58,7 @@ my_data$data$weather[[1]]
 
 kelvin_to_f(my_data$data$temp)
 
-bref_team_results("NYM", 2015)
+bref_team_results("LAA", 2023)
 
 team_res <- bref_team_results('Houston Astros', 2023)
 
@@ -71,7 +75,7 @@ sched <- mlb_schedule(season = 2023, level_ids = "1")
 
 today_games <- sched %>% filter(date == '2023-08-25')
 
-my_game_pks <- mlb_game_pks('2023-09-08')
+my_game_pks <- mlb_game_pks('2023-09-13')
 
 my_game_pks %>% data.frame()
 

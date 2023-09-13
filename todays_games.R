@@ -7,6 +7,35 @@ library(lubridate)
 library(httr)
 library(jsonlite)
 
+source('../weather_api_key.R')
+
+latlong <- read_csv('../baseball_latlong.csv')
+
+hitting_stats_23_skinny <- mlb_stats(
+  stat_type = 'season',
+  stat_group = 'hitting',
+  season = 2023,
+  player_pool = 'All'
+) %>%
+  mutate(k_rate = strike_outs / plate_appearances) %>%
+  select(player_id, plate_appearances, k_rate, avg, obp, slg, ops)
+
+pitching_stats_23_skinny <- mlb_stats(
+  stat_type = 'season',
+  stat_group = 'pitching',
+  season = 2023,
+  player_pool = 'All'
+) %>%
+  rename(
+    c('ip' = 'innings_pitched',
+      'k_per_9' = 'strikeouts_per9inn')
+  ) %>%
+  mutate(
+    ip = as.numeric(ip),
+    ra = runs / ip * 9
+  ) %>%
+  select(player_id, ip, ra, k_per_9, whip, ops)
+
 ui <- fluidPage(
   
   dateInput(
@@ -66,33 +95,6 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-  
-  latlong <- read_csv('../baseball_latlong.csv')
-  
-  hitting_stats_23_skinny <- mlb_stats(
-    stat_type = 'season',
-    stat_group = 'hitting',
-    season = 2023,
-    player_pool = 'All'
-  ) %>%
-    mutate(k_rate = strike_outs / plate_appearances) %>%
-    select(player_id, plate_appearances, k_rate, avg, obp, slg, ops)
-  
-  pitching_stats_23_skinny <- mlb_stats(
-    stat_type = 'season',
-    stat_group = 'pitching',
-    season = 2023,
-    player_pool = 'All'
-    ) %>%
-    rename(
-      c('ip' = 'innings_pitched',
-      'k_per_9' = 'strikeouts_per9inn')
-      ) %>%
-    mutate(
-      ip = as.numeric(ip),
-      ra = runs / ip * 9
-    ) %>%
-    select(player_id, ip, ra, k_per_9, whip, ops)
   
   # get game_pks for this date
   get_game_pks <- reactive({
@@ -251,7 +253,11 @@ server <- function(input, output, session) {
   
   # get visitors last 10 (should combine with get_home_last_10)
   get_visitors_last_10 <- reactive({
-    bref_team_results(get_away_team_name(), 2023) %>%
+    away_team_name <- get_away_team_name()
+    if (away_team_name == 'Los Angeles Angels') {
+      away_team_name <- 'LAA'
+    }
+    bref_team_results(away_team_name, 2023) %>%
       mutate(
         full_date = paste(gsub("\\s*\\([^\\)]+\\)", "", Date), Year),
         game_dt = mdy(full_date),
