@@ -5,8 +5,6 @@ library(lubridate)
 library(httr)
 library(jsonlite)
 
-my_api_key <- 'my_api_key'
-
 kelvin_to_f <- function(kelvin) {
   (kelvin - 273) * 9/5 + 32
 }

@@ -67,8 +67,6 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  my_api_key <- 'my_api_key'
-  
   latlong <- read_csv('../baseball_latlong.csv')
   
   hitting_stats_23_skinny <- mlb_stats(
