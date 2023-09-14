@@ -102,12 +102,12 @@ ui <- fluidPage(
   fluidRow(
     column(
       6,
-      h5('Visitors last 10'),
+      tags$h5((htmlOutput("visitors_last_10_header"))),
       tableOutput('visitors_last_10')
       ),
     column(
       6,
-      h5('Home team last 10'),
+      tags$h5((htmlOutput("home_last_10_header"))),
       tableOutput('home_last_10')
     ),
   ),
@@ -115,12 +115,12 @@ ui <- fluidPage(
   fluidRow(
     column(
       6,
-      h5('Home starter'),
+      tags$h5((htmlOutput("home_starter_header"))),
       tableOutput('home_starter')
     ),
     column(
       6,
-      h5('Visitors Starter'),
+      tags$h5((htmlOutput("away_starter_header"))),
       tableOutput('away_starter')
     )
   ),
@@ -128,12 +128,12 @@ ui <- fluidPage(
   fluidRow(
     column(
       6,
-      h5('Visitors Lineup'),
+      tags$h5((htmlOutput("away_lineup_header"))),
       tableOutput('away_batting_order')
     ),
     column(
       6,
-      h5('Home Lineup'),
+      tags$h5((htmlOutput("home_lineup_header"))),
       tableOutput('home_batting_order')
     )
   )
@@ -236,6 +236,30 @@ server <- function(input, output, session) {
       pull(teams.away.team.name)
   })
   
+  get_away_last_10_header <- reactive({
+    paste(get_away_team_name(), ' last 10 games')
+  })
+  
+  get_home_last_10_header <- reactive({
+    paste(get_home_team_name(), ' last 10 games')
+  })
+  
+  get_away_starter_header <- reactive({
+    paste(get_away_team_name(), ' starter')
+  })
+  
+  get_home_starter_header <- reactive({
+    paste(get_home_team_name(), ' starter')
+  })
+  
+  get_away_lineup_header <- reactive({
+    paste(get_away_team_name(), ' batting order')
+  })
+  
+  get_home_lineup_header <- reactive({
+    paste(get_home_team_name(), ' batting order')
+  })
+  
   # get home team name
   get_home_team_name <- reactive({
     get_game_pks() %>%
@@ -313,9 +337,13 @@ server <- function(input, output, session) {
       select(Date, H_A, `D/N`, Opp, Result, R, RA)
   })
   
-  # get pitchers
+  # get home team last 10
   get_home_last_10 <- reactive({
-    bref_team_results(get_home_team_name(), 2023) %>%
+    home_team_name <- get_home_team_name()
+    if (home_team_name == 'Los Angeles Angels') {
+      home_team_name <- 'LAA'
+    }
+    bref_team_results(home_team_name, 2023) %>%
       mutate(
         full_date = paste(gsub("\\s*\\([^\\)]+\\)", "", Date), Year),
         game_dt = mdy(full_date),
@@ -327,15 +355,19 @@ server <- function(input, output, session) {
       select(Date, H_A, `D/N`, Opp, Result, R, RA)
   })
   
-  
-  # batting_orders_both <- get_batting_orders()
-  
   output$weather <- renderText(get_weather())
+  
+  output$visitors_last_10_header <- renderText(get_away_last_10_header())
+  output$home_last_10_header <- renderText(get_home_last_10_header())
   
   output$visitors_last_10 <- renderTable(get_visitors_last_10())
   output$home_last_10 <- renderTable(get_home_last_10())
+  
+  output$away_starter_header <- renderText(get_away_starter_header())
+  output$home_starter_header <- renderText(get_home_starter_header())
 
-  output$away_team_name <- renderText(get_away_team_name())
+  output$away_lineup_header <- renderText(get_away_lineup_header())
+  output$home_lineup_header <- renderText(get_home_lineup_header())
   
   output$away_starter <- renderTable(get_away_pitcher())
   
