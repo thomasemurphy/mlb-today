@@ -119,7 +119,7 @@ ui <- fluidPage(
   fluidRow(
     column(
       8,
-      h5('Gametime weather'),
+      h5('Weather'),
       textOutput("weather")
     )
   ),
@@ -160,6 +160,18 @@ ui <- fluidPage(
       6,
       tags$h5((htmlOutput("home_lineup_header"))),
       tableOutput('home_batting_order')
+    )
+  ),
+  
+  fluidRow(
+    column(
+      6,
+      tableOutput('away_lineup_summary')
+    ),
+    column(
+      6,
+      # tags$h5((htmlOutput("home_lineup_header"))),
+      tableOutput('home_lineup_summary')
     )
   )
 )
@@ -301,6 +313,22 @@ server <- function(input, output, session) {
       rename(c('#'='batting_order', 'player' = 'fullName', 'pos'='abbreviation',
                'pa' = 'plate_appearances'))
   })
+  
+  get_home_lineup_summary <- reactive({
+    get_home_batting_order() %>%
+      filter(pa > 100) %>%
+      summarize(
+        `#` = '',
+        team = get_home_team_name(),
+        pos = '',
+        pa = 'avgs',
+        k_rate = mean(as.numeric(k_rate)),
+        avg = mean(as.numeric(avg)),
+        obp = mean(as.numeric(obp)),
+        slg = mean(as.numeric(slg)),
+        ops = mean(as.numeric(ops))
+        )
+  })
 
   # split batting order into away (inefficient)
   get_away_batting_order <- reactive({
@@ -309,6 +337,18 @@ server <- function(input, output, session) {
       select(batting_order, fullName, abbreviation, plate_appearances, k_rate, avg, obp, slg, ops) %>%
       rename(c('#'='batting_order', 'player' = 'fullName', 'pos'='abbreviation',
                'pa' = 'plate_appearances'))
+  })
+  
+  get_away_lineup_summary <- reactive({
+    get_away_batting_order() %>%
+      filter(pa > 100) %>%
+      summarize(
+        k_rate = mean(as.numeric(k_rate)),
+        avg = mean(as.numeric(avg)),
+        obp = mean(as.numeric(obp)),
+        slg = mean(as.numeric(slg)),
+        ops = mean(as.numeric(ops))
+      )
   })
   
   # get home starter
@@ -401,7 +441,10 @@ server <- function(input, output, session) {
     colnames = TRUE
     )
   
-  output$home_team_name <- renderText(get_home_team_name())
+  output$home_lineup_summary <- renderTable(
+    get_home_lineup_summary(),
+    digits = 3
+  )
   
   output$home_starter <- renderTable(get_home_pitcher())
   
@@ -409,6 +452,11 @@ server <- function(input, output, session) {
     get_away_batting_order(),
     colnames = TRUE
     )
+  
+  output$away_lineup_summary <- renderTable(
+    get_away_lineup_summary(),
+    digits = 3
+  )
   
 }
 
