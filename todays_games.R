@@ -83,11 +83,36 @@ get_wind_dir_str <- function(park_home_to_center, wind_deg_from_north) {
 
 ui <- fluidPage(
   
+  # tags$head(
+  #   tags$style(
+  #     type = "text/css",
+  #     "label{
+  #       display: table-cell;
+  #       text-align: center;
+  #       vertical-align: middle;
+  #       }
+  #     .form-group {
+  #       display: table-row;
+  #     }"
+  #     )
+  # ),
+  
+  tags$head(
+    tags$style(
+      type = "text/css",
+      "label{
+        display: table-cell;
+        text-align: center;
+        vertical-align: middle;
+        }"
+    )
+  ),
+  
   dateInput(
     'date',
-    label = 'Date',
+    label = h5('Date'),
     value = today()
-    ),
+  ),
   
   tableOutput("games"),
   
