@@ -36,6 +36,51 @@ pitching_stats_23_skinny <- mlb_stats(
   ) %>%
   select(player_id, ip, ra, k_per_9, whip, ops)
 
+get_wind_dir_str <- function(park_home_to_center, wind_deg_from_north) {
+  park_dir <- wind_deg_from_north - park_home_to_center
+  if (park_dir < 0) {
+    park_dir <- park_dir + 360
+  }
+  wind_dir_str <- ifelse(
+    (park_dir >= 345) | (park_dir < 15),
+    'in from center',
+    ifelse(
+      park_dir <= 45,
+      'in from right',
+      ifelse(
+        park_dir <= 90,
+        'cross-inward from right',
+        ifelse(
+          park_dir <= 135,
+          'cross-outward to left',
+          ifelse(
+            park_dir <= 165,
+            'out to left',
+            ifelse(
+              park_dir <= 195,
+              'out to center',
+              ifelse(
+                park_dir <= 225,
+                'out to right',
+                ifelse(
+                  park_dir <= 270,
+                  'cross-outward to right',
+                  ifelse(
+                    park_dir <= 315,
+                    'cross-inward from left',
+                    'in from left'
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+  wind_dir_str
+}
+
 ui <- fluidPage(
   
   dateInput(
@@ -150,9 +195,8 @@ server <- function(input, output, session) {
       'wind ',
       round(weather_df$wind_speed[1], 0),
       ' mph ',
-      'from ',
-      weather_df$wind_deg,
-      ' from north, ',
+      get_wind_dir_str(lat_long_row$home_center_deg, weather_df$wind_deg),
+      ', ',
       weather_df$weather[[1]]$description[1]
     )
     weather_str

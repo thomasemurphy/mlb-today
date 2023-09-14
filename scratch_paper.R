@@ -7,6 +7,53 @@ library(jsonlite)
 
 source('../weather_api_key.R')
 
+# kauffman stadium. home-to-center vector is 45 degrees from north
+# wind direction is 30 degrees from north
+# 45 - 30 = 15 degrees
+# 15 degrees is in from left-center
+# 
+# wind dir is 60 degrees
+# 45 - 60 = -15
+# -15 is in from right-center
+# 
+# 0 is in from center
+# -15 to 15 is in from center
+# -45 to -15 is in from right
+# 15 to 45 is in from right
+# 
+# wind direction is 225 degrees from north
+# 45 - 225 = -180
+# -180 is out to center
+# 
+# wind direction is 240 from north
+# 45 - 240 = -195
+# -195 is out to right-center
+# 
+# -165 is out to left-center
+# 
+# -165 to -195 is out to center
+# -195 to -225 is out to right
+# -135 to -165 is out to left
+# 
+# what is between out to left and in from right
+# out to left is -135 to -165
+# in from right is 15 to 45
+# 
+# if it is negative, add 360
+# 
+# dealing just with positive degrees between 0 and 360...
+# 
+# gt 345 or lt 15 is in from center
+# gt 15 and lt 45 is in from right
+# gt 45 and lt 90 is cross-wind in from right
+# gt 90 and lt 135 is cross-wind out to left
+# gt 135 and lt 165 is out to left
+# gt 165 and lt 195 is out to center
+# gt 195 and lt 225 is out to right
+# gt 225 and lt 270 is cross-wind out to right
+# gt 270 and lt 315 is cross-wind in from left
+# gt 315 and lt 345 is in from left
+
 team_res <- bref_team_results('Houston Astros', 2023)
 
 kelvin_to_f <- function(kelvin) {
