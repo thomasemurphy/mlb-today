@@ -318,10 +318,7 @@ server <- function(input, output, session) {
     get_home_batting_order() %>%
       filter(pa > 100) %>%
       summarize(
-        `#` = '',
-        team = get_home_team_name(),
-        pos = '',
-        pa = 'avgs',
+        `#` = paste(get_home_team_name(), 'averages'),
         k_rate = mean(as.numeric(k_rate)),
         avg = mean(as.numeric(avg)),
         obp = mean(as.numeric(obp)),
@@ -343,6 +340,7 @@ server <- function(input, output, session) {
     get_away_batting_order() %>%
       filter(pa > 100) %>%
       summarize(
+        `#` = paste(get_away_team_name(), 'averages'),
         k_rate = mean(as.numeric(k_rate)),
         avg = mean(as.numeric(avg)),
         obp = mean(as.numeric(obp)),
