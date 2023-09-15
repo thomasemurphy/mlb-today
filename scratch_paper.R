@@ -5,7 +5,7 @@ library(lubridate)
 library(httr)
 library(jsonlite)
 
-source('../weather_api_key.R')
+source('../api_keys.R')
 
 # kauffman stadium. home-to-center vector is 45 degrees from north
 # wind direction is 30 degrees from north
@@ -54,7 +54,7 @@ source('../weather_api_key.R')
 # gt 270 and lt 315 is cross-wind in from left
 # gt 315 and lt 345 is in from left
 
-team_res <- bref_team_results('Houston Astros', 2023)
+team_res <- bref_team_results('CLE', 2023)
 
 kelvin_to_f <- function(kelvin) {
   (kelvin - 273) * 9/5 + 32

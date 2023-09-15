@@ -7,7 +7,7 @@ library(lubridate)
 library(httr)
 library(jsonlite)
 
-source('../weather_api_key.R')
+source('../api_keys.R')
 
 latlong <- read_csv('../baseball_latlong.csv')
 
@@ -222,7 +222,7 @@ server <- function(input, output, session) {
       as.integer(start_ts),
       '&units=imperial',
       '&APPID=',
-      my_api_key
+      weather_api_key
     )
     api_response <- httr::GET(api_query)
     weather_df <- fromJSON(rawToChar(api_response$content), flatten = TRUE)$data
@@ -387,6 +387,8 @@ server <- function(input, output, session) {
     away_team_name <- get_away_team_name()
     if (away_team_name == 'Los Angeles Angels') {
       away_team_name <- 'LAA'
+    } else if (away_team_name == 'Cleveland Guardians') {
+      away_team_name <- 'CLE'
     }
     bref_team_results(away_team_name, 2023) %>%
       mutate(
@@ -405,6 +407,8 @@ server <- function(input, output, session) {
     home_team_name <- get_home_team_name()
     if (home_team_name == 'Los Angeles Angels') {
       home_team_name <- 'LAA'
+    } else if (home_team_name == 'Cleveland Guardians') {
+      home_team_name <- 'CLE'
     }
     bref_team_results(home_team_name, 2023) %>%
       mutate(
