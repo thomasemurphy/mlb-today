@@ -112,6 +112,7 @@ make_odds_df <- function(for_date = today()) {
     home_team <- todays_odds$home_team[i_game]
     away_team_all_odds <- c()
     home_team_all_odds <- c()
+    over_under_all_points <- c()
     for (i_bookie in 1:length(my_odds$bookmakers[[i_game]]$markets)) {
       away_team_all_odds <- append(
         away_team_all_odds,
@@ -125,14 +126,22 @@ make_odds_df <- function(for_date = today()) {
           filter(name == home_team) %>%
           pull(price)
       )
+      if (length(my_odds$bookmakers[[i_game]]$markets[[i_bookie]]$outcomes) == 2) {
+        over_under_all_points <- append(
+          over_under_all_points,
+          my_odds$bookmakers[[i_game]]$markets[[i_bookie]]$outcomes[[2]]$point[1]
+        )
+      }
     }
     away_team_mean_odds <- mean(away_team_all_odds)
     home_team_mean_odds <- mean(home_team_all_odds)
+    over_under_avg <- mean(over_under_all_points)
     moneylines_df <- rbind(
       moneylines_df,
       data.frame(
         team = c(away_team, home_team),
-        payout = c(away_team_mean_odds, home_team_mean_odds)
+        payout = c(away_team_mean_odds, home_team_mean_odds),
+        over_under = c(over_under_avg, over_under_avg)
       )
     )
   }

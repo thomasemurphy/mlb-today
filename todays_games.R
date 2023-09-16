@@ -117,6 +117,13 @@ ui <- fluidPage(
       # tags$h5((htmlOutput("home_lineup_header"))),
       textOutput('home_moneyline_text')
     )
+  ),
+  
+  fluidRow(
+    column(
+      6,
+      textOutput('over_under_text')
+    )
   )
   
 )
@@ -383,6 +390,14 @@ server <- function(input, output, session) {
     paste(home_team_name, home_team_moneyline)
   })
   
+  get_over_under_text <- reactive({
+    home_team_name <- get_home_team_name()
+    over_under <- todays_odds_df %>%
+      filter(team == home_team_name) %>%
+      pull(over_under)
+    paste('Over-under:', round(over_under, 1))    
+  })
+  
   output$weather <- renderText(get_weather())
   
   output$visitors_last_10_header <- renderText(get_away_last_10_header())
@@ -423,6 +438,8 @@ server <- function(input, output, session) {
   
   output$away_moneyline_text <- renderText(get_away_moneyline_text())
   output$home_moneyline_text <- renderText(get_home_moneyline_text())
+  
+  output$over_under_text <- renderText(get_over_under_text())
   
 }
 

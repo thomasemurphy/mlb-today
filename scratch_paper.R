@@ -28,7 +28,7 @@ my_odds <- fromJSON(rawToChar(res$content), flatten = TRUE) %>%
 
 # get only today
 todays_odds <- my_odds %>%
-  filter(date(commence_time) == for_date)
+  filter(date(commence_time) == today())
 
 # number of games today
 n_games_today <- nrow(todays_odds)
@@ -36,35 +36,26 @@ n_games_today <- nrow(todays_odds)
 moneylines_df <- data.frame()
 
 # loop over games
-for (i_game in 1:n_games_today) {
-  away_team <- todays_odds$away_team[i_game]
-  home_team <- todays_odds$home_team[i_game]
-  away_team_all_odds <- c()
-  home_team_all_odds <- c()
-  for (i_bookie in 1:length(my_odds$bookmakers[[i_game]]$markets)) {
-    away_team_all_odds <- append(
-      away_team_all_odds,
-      my_odds$bookmakers[[i_game]]$markets[[i_bookie]]$outcomes[[1]] %>%
-        filter(name == away_team) %>%
-        pull(price)
-    )
-    home_team_all_odds <- append(
-      home_team_all_odds,
-      my_odds$bookmakers[[i_game]]$markets[[i_bookie]]$outcomes[[1]] %>%
-        filter(name == home_team) %>%
-        pull(price)
+i_game <- 1
+over_under_all_points <- c()
+away_team <- todays_odds$away_team[i_game]
+home_team <- todays_odds$home_team[i_game]
+for (i_bookie in 1:length(my_odds$bookmakers[[i_game]]$markets)) {
+  if (length(my_odds$bookmakers[[i_game]]$markets[[i_bookie]]$outcomes) == 2) {
+    over_under_all_points <- append(
+      over_under_all_points,
+      my_odds$bookmakers[[i_game]]$markets[[i_bookie]]$outcomes[[2]]$point[1]
     )
   }
-  away_team_mean_odds <- mean(away_team_all_odds)
-  home_team_mean_odds <- mean(home_team_all_odds)
-  moneylines_df <- rbind(
-    moneylines_df,
-    data.frame(
-      team = c(away_team, home_team),
-      moneyline = c(away_team_mean_odds, home_team_mean_odds)
-    )
-  )
 }
+over_under_avg <- mean(over_under_all_points)
+moneylines_df <- rbind(
+  moneylines_df,
+  data.frame(
+    team = c(away_team, home_team),
+    moneyline = c(over_under_avg, over_under_avg)
+  )
+)
 
 odds_api_request <- paste0(
   'https://api.the-odds-api.com/v4/sports/?apiKey=',
