@@ -7,6 +7,95 @@ library(jsonlite)
 
 source('../api_keys.R')
 
+# make api request url
+odds_api_request <- paste0(
+  'https://api.the-odds-api.com/v4/sports/',
+  'baseball_mlb/',
+  'odds/',
+  '?apiKey=',
+  odds_api_key,
+  '&regions=us,us2',
+  '&markets=',
+  'h2h,totals'
+)
+
+# get api response
+res <- httr::GET(odds_api_request)
+
+# process response
+my_odds <- fromJSON(rawToChar(res$content), flatten = TRUE) %>%
+  mutate(commence_time = with_tz(as_datetime(commence_time), 'US/Eastern'))
+
+# get only today
+todays_odds <- my_odds %>%
+  filter(date(commence_time) == for_date)
+
+# number of games today
+n_games_today <- nrow(todays_odds)
+
+moneylines_df <- data.frame()
+
+# loop over games
+for (i_game in 1:n_games_today) {
+  away_team <- todays_odds$away_team[i_game]
+  home_team <- todays_odds$home_team[i_game]
+  away_team_all_odds <- c()
+  home_team_all_odds <- c()
+  for (i_bookie in 1:length(my_odds$bookmakers[[i_game]]$markets)) {
+    away_team_all_odds <- append(
+      away_team_all_odds,
+      my_odds$bookmakers[[i_game]]$markets[[i_bookie]]$outcomes[[1]] %>%
+        filter(name == away_team) %>%
+        pull(price)
+    )
+    home_team_all_odds <- append(
+      home_team_all_odds,
+      my_odds$bookmakers[[i_game]]$markets[[i_bookie]]$outcomes[[1]] %>%
+        filter(name == home_team) %>%
+        pull(price)
+    )
+  }
+  away_team_mean_odds <- mean(away_team_all_odds)
+  home_team_mean_odds <- mean(home_team_all_odds)
+  moneylines_df <- rbind(
+    moneylines_df,
+    data.frame(
+      team = c(away_team, home_team),
+      moneyline = c(away_team_mean_odds, home_team_mean_odds)
+    )
+  )
+}
+
+odds_api_request <- paste0(
+  'https://api.the-odds-api.com/v4/sports/?apiKey=',
+  odds_api_key
+)
+
+res <- httr::GET(odds_api_request)
+
+res$content
+
+my_sports <- fromJSON(rawToChar(res$content), flatten = TRUE)
+
+my_odds_df <- make_odds_df()
+
+length(my_odds$bookmakers[[1]]$markets)
+
+names(my_odds)
+
+for (i in 1:length(my_odds$bookmakers[[3]]$markets)) {
+  print(my_odds$bookmakers[[3]]$markets[[i]]$outcomes[[1]]$price[1])
+}
+
+my_odds$bookmakers[[4]]$markets[[1]]$outcomes[[1]]
+
+my_odds$bookmakers[[1]] %>%
+  separate(
+    markets,
+    into = as.character(seq(14)),
+    sep = ','
+    )
+
 # kauffman stadium. home-to-center vector is 45 degrees from north
 # wind direction is 30 degrees from north
 # 45 - 30 = 15 degrees
