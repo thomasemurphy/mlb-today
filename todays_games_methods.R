@@ -9,7 +9,7 @@ latlong <- read_csv('../baseball_latlong.csv')
 hitting_stats_23_skinny <- mlb_stats(
   stat_type = 'season',
   stat_group = 'hitting',
-  season = 2023,
+  season = 2024,
   player_pool = 'All'
 ) %>%
   mutate(k_rate = strike_outs / plate_appearances) %>%
@@ -18,7 +18,7 @@ hitting_stats_23_skinny <- mlb_stats(
 pitching_stats_23_skinny <- mlb_stats(
   stat_type = 'season',
   stat_group = 'pitching',
-  season = 2023,
+  season = 2024,
   player_pool = 'All'
 ) %>%
   rename(

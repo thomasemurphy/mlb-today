@@ -342,7 +342,7 @@ server <- function(input, output, session) {
     } else if (away_team_name == 'Cleveland Guardians') {
       away_team_name <- 'CLE'
     }
-    bref_team_results(away_team_name, 2023) %>%
+    bref_team_results(away_team_name, 2024) %>%
       mutate(
         full_date = paste(gsub("\\s*\\([^\\)]+\\)", "", Date), Year),
         game_dt = mdy(full_date),
@@ -362,7 +362,7 @@ server <- function(input, output, session) {
     } else if (home_team_name == 'Cleveland Guardians') {
       home_team_name <- 'CLE'
     }
-    bref_team_results(home_team_name, 2023) %>%
+    bref_team_results(home_team_name, 2024) %>%
       mutate(
         full_date = paste(gsub("\\s*\\([^\\)]+\\)", "", Date), Year),
         game_dt = mdy(full_date),
